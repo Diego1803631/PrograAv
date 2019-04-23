@@ -28,6 +28,7 @@ char _arch_esp[] = "spc.txt";
 int gShow = 0;
 void openfilename();
 void LlenaEspecies(HWND objeto, UINT mensa, char *file);
+char*ConvierteFecha(char*Fecha);
 BOOL CALLBACK Principal(HWND Dlg, UINT Mensaje, WPARAM wParam, LPARAM lparam);
 BOOL CALLBACK NuevaCita(HWND Dlg, UINT Mensaje, WPARAM wParam, LPARAM lparam);
 BOOL CALLBACK DatosD(HWND Dlg, UINT Mensaje, WPARAM wParam, LPARAM lparam);
@@ -142,10 +143,11 @@ BOOL CALLBACK NuevaCita(HWND Dlg, UINT Mensaje, WPARAM wParam, LPARAM lparam) {
 			SendDlgItemMessage(Dlg, IDC_MASCOTA, WM_GETTEXT, 100, (LPARAM)datos->mascota);
 			SendDlgItemMessage(Dlg, IDC_MOTIVO, WM_GETTEXT, 100, (LPARAM)datos->motivo);
 			SendDlgItemMessage(Dlg, IDC_COSTO, WM_GETTEXT, 100, (LPARAM)datos->costo);
-			int index = SendMessage(hCboSpc, CB_GETCURSEL, 0, 0);			SendMessage(hCboSpc, CB_GETLBTEXT, (WPARAM)index, (LPARAM)datos->especie);
-			/*char fechatemp[100] = "";
-			SendDlgItemMessage(Dlg, IDC_FECHA, WM_GETTEXT, (WPARAM)100, (LPARAM)fechatemp);
-			strcpy_s(datos->fecha, ConvierteFecha(fechatemp));*/
+			int index = SendMessage(hCboSpc, CB_GETCURSEL, 0, 0);
+			SendMessage(hCboSpc, CB_GETLBTEXT, (WPARAM)index, (LPARAM)datos->especie);
+			SendDlgItemMessage(Dlg, IDC_FECHA, WM_GETTEXT, (WPARAM)100, (LPARAM)datos->fecha);
+			ConvierteFecha(datos->fecha);
+			/*SendDlgItemMessage(Dlg, IDC_HORA, WM_GETTEXT, (WPARAM)100, (LPARAM)datos->hora);*/
 			EndDialog(Dlg, 0);
 			return true;
 		}
@@ -256,14 +258,7 @@ BOOL CALLBACK Agenda(HWND Dlg, UINT Mensaje, WPARAM wParam, LPARAM lparam) {
 		return (INT_PTR)hbrBkgnd;
 	case WM_INITDIALOG:
 	{
-		SendDlgItemMessage(Dlg, IDC_NOMBRE, WM_SETTEXT, 100, (LPARAM)datos->nombre);
-		SendDlgItemMessage(Dlg, IDC_APELLIDO, WM_SETTEXT, 100, (LPARAM)datos->apellido);
-		SendDlgItemMessage(Dlg, IDC_TELEFONO, WM_SETTEXT, 100, (LPARAM)datos->telefono);
-		SendDlgItemMessage(Dlg, IDC_ESPECIE, WM_SETTEXT, 100, (LPARAM)datos->especie);
-		SendDlgItemMessage(Dlg, IDC_MASCOTA, WM_SETTEXT, 100, (LPARAM)datos->mascota);
-		SendDlgItemMessage(Dlg, IDC_MOTIVO, WM_SETTEXT, 100, (LPARAM)datos->motivo);
-		SendDlgItemMessage(Dlg, IDC_COSTO, WM_SETTEXT, 100, (LPARAM)datos->costo);
-
+		SendDlgItemMessage(Dlg, IDC_LISTA, CB_ADDSTRING, 100, (LPARAM)datos->fecha);
 		return true;
 	}
 	case WM_COMMAND:
@@ -271,6 +266,23 @@ BOOL CALLBACK Agenda(HWND Dlg, UINT Mensaje, WPARAM wParam, LPARAM lparam) {
 
 		switch (LOWORD(wParam))
 		{
+		case IDC_LISTA:
+		{
+			switch (HIWORD(wParam))
+			{
+			case CBN_SELCHANGE:
+			{
+				SendDlgItemMessage(Dlg, IDC_NOMBRE, WM_SETTEXT, 100, (LPARAM)datos->nombre);
+				SendDlgItemMessage(Dlg, IDC_APELLIDO, WM_SETTEXT, 100, (LPARAM)datos->apellido);
+				SendDlgItemMessage(Dlg, IDC_TELEFONO, WM_SETTEXT, 100, (LPARAM)datos->telefono);
+				SendDlgItemMessage(Dlg, IDC_ESPECIE, WM_SETTEXT, 100, (LPARAM)datos->especie);
+				SendDlgItemMessage(Dlg, IDC_MASCOTA, WM_SETTEXT, 100, (LPARAM)datos->mascota);
+				SendDlgItemMessage(Dlg, IDC_MOTIVO, WM_SETTEXT, 100, (LPARAM)datos->motivo);
+				SendDlgItemMessage(Dlg, IDC_COSTO, WM_SETTEXT, 100, (LPARAM)datos->costo);
+			}
+			}
+			return true;
+		}
 		case ID_ARCHIVO_ELIMINAR:
 		{
 			strcpy_s(datos->nombre, " ");
@@ -454,5 +466,20 @@ void LlenaEspecies(HWND objeto, UINT mensa, char *file)
 		archi.close();
 	}
 
+}
+char*ConvierteFecha(char*Fecha)
+{
+	char FechaOk[11] = "";
+
+	string cutMonth, FechaOri;
+	cutMonth = Fecha; //Guarda en un string el valor de un char
+	string Day = cutMonth.substr(0, 2);
+	string Month = cutMonth.substr(3, 2);
+	string Year = cutMonth.substr(6, 4);
+
+	FechaOri = Year + Month + Day;
+	strcat_s(FechaOk, FechaOri.c_str());
+
+	return FechaOk;
 }
 
